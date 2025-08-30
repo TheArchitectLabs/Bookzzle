@@ -3,5 +3,6 @@ Bookzzle is the place to track all of your puzzles and books. Set a reading goal
 
 ## License
 
-Copyright 2024 (c) Michael Pascucci
-See End User License Agreement in the LICENSE file. The LICENSE file must be included with this software at all times.
+Copyright 2025 (c) Michael Pascucci
+See End User License Agreement in the LICENSE file. 
+The LICENSE file must be included with this software at all times.

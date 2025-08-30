@@ -44,7 +44,7 @@ struct HomeView: View {
                             headerMenu()
                             subTitle()
                             if medium == .puzzle {
-                                NavigationLink(destination: EmptyView()) {
+                                NavigationLink(destination: PuzzleAddView()) {
                                     Image(systemName: "plus.circle")
                                         .background(.green)
                                         .clipShape(Circle())
@@ -304,12 +304,12 @@ struct HomeView: View {
     
     private func handleIncomingURL(_ url: URL) {
         guard let type = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType else {
-            ns.show(type: .error, title: BZError.badFileType.description, message: BZError.badFileType.message, duration: BZError.badFileType.duration)
+            ns.show(type: .error, title: BZNotification.badFileType.description, message: BZNotification.badFileType.message, duration: BZNotification.badFileType.duration)
             return
         }
         
         guard let data = try? Data(contentsOf: url) else {
-            ns.show(type: .error, title: BZError.badFileContents.description, message: BZError.badFileContents.message, duration: BZError.badFileContents.duration)
+            ns.show(type: .error, title: BZNotification.badFileContents.description, message: BZNotification.badFileContents.message, duration: BZNotification.badFileContents.duration)
             return
         }
         
@@ -325,10 +325,10 @@ struct HomeView: View {
                 let received = try decoder.decode(Puzzle.self, from: data)
                 try insert(received)
             } else {
-                ns.show(type: .error, title: BZError.unsupportedFileFormat.description, message: BZError.unsupportedFileFormat.message, duration: BZError.unsupportedFileFormat.duration)
+                ns.show(type: .error, title: BZNotification.unsupportedFileFormat.description, message: BZNotification.unsupportedFileFormat.message, duration: BZNotification.unsupportedFileFormat.duration)
             }
         } catch {
-            ns.show(type: .error, title: BZError.failedToDecode.description, message: BZError.failedToDecode.message, duration: BZError.failedToDecode.duration)
+            ns.show(type: .error, title: BZNotification.failedToDecode.description, message: BZNotification.failedToDecode.message, duration: BZNotification.failedToDecode.duration)
         }
     }
     

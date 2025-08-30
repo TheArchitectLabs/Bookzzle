@@ -168,49 +168,49 @@ struct OpenLibrarySearchView: View {
                 if results.docs.count < 1 {
                     ns.show(
                         type: .warning,
-                        title: BZError.noResults.description,
-                        message: BZError.noResults.message,
-                        duration: BZError.noResults.duration
+                        title: BZNotification.noResults.description,
+                        message: BZNotification.noResults.message,
+                        duration: BZNotification.noResults.duration
                     )
                     clear()
                 } else {
                     works = results.docs
                 }
                 isSearching = false
-            } catch BZError.invalidURL {
+            } catch BZNotification.invalidURL {
                 ns.show(
                     type: .error,
-                    title: BZError.invalidURL.description,
-                    message: BZError.invalidURL.message,
-                    duration: BZError.invalidURL.duration
+                    title: BZNotification.invalidURL.description,
+                    message: BZNotification.invalidURL.message,
+                    duration: BZNotification.invalidURL.duration
                 )
-            } catch BZError.invalidStatusCode(let statusCode) {
+            } catch BZNotification.invalidStatusCode(let statusCode) {
                 ns.show(
                     type: .error,
-                    title: BZError.invalidStatusCode(code: statusCode).description,
-                    message: BZError.invalidStatusCode(code: statusCode).message,
-                    duration: BZError.invalidStatusCode(code: statusCode).duration
+                    title: BZNotification.invalidStatusCode(code: statusCode).description,
+                    message: BZNotification.invalidStatusCode(code: statusCode).message,
+                    duration: BZNotification.invalidStatusCode(code: statusCode).duration
                 )
-            } catch BZError.failedToDecode {
+            } catch BZNotification.failedToDecode {
                 ns.show(
                     type: .error,
-                    title: BZError.failedToDecode.description,
-                    message: BZError.failedToDecode.message,
-                    duration: BZError.failedToDecode.duration
+                    title: BZNotification.failedToDecode.description,
+                    message: BZNotification.failedToDecode.message,
+                    duration: BZNotification.failedToDecode.duration
                 )
-            } catch BZError.invalidData {
+            } catch BZNotification.invalidData {
                 ns.show(
                     type: .error,
-                    title: BZError.invalidData.description,
-                    message: BZError.invalidData.message,
-                    duration: BZError.invalidData.duration
+                    title: BZNotification.invalidData.description,
+                    message: BZNotification.invalidData.message,
+                    duration: BZNotification.invalidData.duration
                 )
             } catch {
                 ns.show(
                     type: .error,
-                    title: BZError.unknown.description,
-                    message: BZError.unknown.message,
-                    duration: BZError.unknown.duration
+                    title: BZNotification.unknown.description,
+                    message: BZNotification.unknown.message,
+                    duration: BZNotification.unknown.duration
                 )
             }
         }
@@ -225,49 +225,49 @@ struct OpenLibrarySearchView: View {
                 if results.docs.count < 1 {
                     ns.show(
                         type: .warning,
-                        title: BZError.noResults.description,
-                        message: BZError.noResults.message,
-                        duration: BZError.noResults.duration
+                        title: BZNotification.noResults.description,
+                        message: BZNotification.noResults.message,
+                        duration: BZNotification.noResults.duration
                     )
                     clear()
                 } else {
                     authors = results.docs
                 }
                 isSearching = false
-            } catch BZError.invalidURL {
+            } catch BZNotification.invalidURL {
                 ns.show(
                     type: .error,
-                    title: BZError.invalidURL.description,
-                    message: BZError.invalidURL.message,
-                    duration: BZError.invalidURL.duration
+                    title: BZNotification.invalidURL.description,
+                    message: BZNotification.invalidURL.message,
+                    duration: BZNotification.invalidURL.duration
                 )
-            } catch BZError.invalidStatusCode(let statusCode) {
+            } catch BZNotification.invalidStatusCode(let statusCode) {
                 ns.show(
                     type: .error,
-                    title: BZError.invalidStatusCode(code: statusCode).description,
-                    message: BZError.invalidStatusCode(code: statusCode).message,
-                    duration: BZError.invalidStatusCode(code: statusCode).duration
+                    title: BZNotification.invalidStatusCode(code: statusCode).description,
+                    message: BZNotification.invalidStatusCode(code: statusCode).message,
+                    duration: BZNotification.invalidStatusCode(code: statusCode).duration
                 )
-            } catch BZError.failedToDecode {
+            } catch BZNotification.failedToDecode {
                 ns.show(
                     type: .error,
-                    title: BZError.failedToDecode.description,
-                    message: BZError.failedToDecode.message,
-                    duration: BZError.failedToDecode.duration
+                    title: BZNotification.failedToDecode.description,
+                    message: BZNotification.failedToDecode.message,
+                    duration: BZNotification.failedToDecode.duration
                 )
-            } catch BZError.invalidData {
+            } catch BZNotification.invalidData {
                 ns.show(
                     type: .error,
-                    title: BZError.invalidData.description,
-                    message: BZError.invalidData.message,
-                    duration: BZError.invalidData.duration
+                    title: BZNotification.invalidData.description,
+                    message: BZNotification.invalidData.message,
+                    duration: BZNotification.invalidData.duration
                 )
             } catch {
                 ns.show(
                     type: .error,
-                    title: BZError.unknown.description,
-                    message: BZError.unknown.message,
-                    duration: BZError.unknown.duration
+                    title: BZNotification.unknown.description,
+                    message: BZNotification.unknown.message,
+                    duration: BZNotification.unknown.duration
                 )
             }
         }

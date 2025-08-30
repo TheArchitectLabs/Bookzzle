@@ -39,10 +39,6 @@ struct AddNewPuzzleCategories: View {
             .font(.title)
             .padding(.bottom, 15)
             
-            ForEach(puzzleCategories) { cat in
-                Text("\(cat.name)")
-            }
-            
             List {
                 ForEach(categories) { category in
                     categoryListRow(category: category)
@@ -97,7 +93,6 @@ struct AddNewPuzzleCategories: View {
         HStack {
             if puzzleCategories.contains(category) {
                 HStack {
-                    Text("\(category.name) found")
                     Button {
                         addRemove(category)
                     } label: {
@@ -107,7 +102,6 @@ struct AddNewPuzzleCategories: View {
                 }
             } else {
                 HStack {
-                    Text("\(category.name) missing")
                     Button {
                         addRemove(category)
                     } label: {
@@ -200,7 +194,7 @@ struct AddNewPuzzleCategories: View {
 
 // MARK: - PREVIEW
 #Preview {
-    @Previewable @State var puzzleCategories: [Category] = Category.sampleCategories
+    @Previewable @State var puzzleCategories: [Category] = []
     let preview = Preview(Category.self)
     let categories = Category.sampleCategories
     preview.addSamples(categories)

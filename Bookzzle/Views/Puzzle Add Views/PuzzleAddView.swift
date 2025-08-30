@@ -5,14 +5,19 @@
 // Copyright (c) 2025 The Architect Labs. All Rights Reserved.
 //
 
+import PhotosUI
+import SwiftData
 import SwiftUI
 
 struct PuzzleAddView: View {
     
     // MARK: - ENVIRONMENT PROPERTIES
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+    @Environment(NotificationService.self) private var ns
     
     // MARK: - LOCAL STATE PROPERTIES
+    @Query private var puzzles: [Puzzle]
     @State private var title: String = ""
     @State private var author: String = ""
     @State private var barcode: String = ""
@@ -24,7 +29,10 @@ struct PuzzleAddView: View {
     @State private var notes: String = ""
     @State private var categories: [Category] = []
     
-    @State private var isShowingCategoryAddUpdateView: Bool = false
+    @State private var puzzlePictureData: Data?
+    @State private var selectedPuzzlePicture: PhotosPickerItem?
+    
+    @State private var isShowingAddNewPuzzleCategoriesView: Bool = false
     let numberOfPieces: [Int] = [100,300,500,1000,2000,0]
     
     // MARK: - VIEW
@@ -46,12 +54,13 @@ struct PuzzleAddView: View {
                 }
                 
                 VStack {
-                    Image(systemName: "puzzlepiece")
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(lineWidth: 2))
-                        .frame(maxWidth: 400)
+                    ImageSelector()
+                    
+                    Button("Add Puzzle") {
+                        checkPuzzleData()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(title.isEmpty || author.isEmpty)
                     
                     ScrollView {
                         puzzleCategory(categories: categories)
@@ -65,6 +74,15 @@ struct PuzzleAddView: View {
                 .scrollIndicators(.hidden)
             }
             .padding(.horizontal)
+            
+            if ns.showNotification {
+                if let notification = ns.currentNotification {
+                    VStack {
+                        Spacer()
+                        NotificationView(notification: notification)
+                    }
+                }
+            }
         }
         .navigationBarBackButtonHidden()
         .onChange(of: status) { oldValue, newValue in
@@ -94,13 +112,86 @@ struct PuzzleAddView: View {
                 dateCompleted = Date.now
             }
         }
-//        .fullScreenCover(isPresented: $isShowingCategoryAddUpdateView) {
-//            AddUpdateCategoryView(puzzle: puzzle)
-//        }
+        .fullScreenCover(isPresented: $isShowingAddNewPuzzleCategoriesView) {
+            AddNewPuzzleCategories(puzzleCategories: $categories)
+        }
+        .task(id: selectedPuzzlePicture) {
+            if let data = try? await selectedPuzzlePicture?.loadTransferable(type: Data.self) {
+                puzzlePictureData = data
+            }
+        }
+    }
+    
+    // MARK: - METHODS
+    private func checkPuzzleData() {
+        // Add Puzzle Button is disabled if Title or Author is empty so they don't need to be checked.
+        // Add Puzzle will default to 1000 pieces, On Shelf, and Current Date for Date Added
+        // Check to make sure BARCODE information is present
+        if barcode.isEmpty {
+            // Barcode is empty
+            // If user is trying to add to the Wishlist, they probably don't have a barcode so this is ok.
+            if status == Status.wishlist.rawValue {
+                // Utilize a UUID for the barcode to ensure it is always unique.
+                barcode = UUID().uuidString
+                
+                // Now check for duplicate puzzles by Title.
+                if puzzles.contains(where: { $0.title.uppercased() == title.uppercased() }) {
+                    // If a duplicate is found set a notification to let user know.
+                    // Stop the process and clear the barcode field.
+                    ns.show(type: .warning, title: BZNotification.puzzleDuplicate.description, message: BZNotification.puzzleDuplicate.message)
+                    barcode = ""
+                } else {
+                    // No duplicate found, go ahead and add the puzzle to the database; no notification needed
+                    insertPuzzle()
+                }
+            } else {
+                // If not trying to add to Wishlist, then a barcode must be present.
+                // If no barcode is included, set a notification that this is not allowed.
+                ns.show(type: .error, title: BZNotification.missingBarcode.description, message: BZNotification.missingBarcode.message)
+            }
+        } else {
+            // Barcode is not empty
+            // Check for duplicate puzzles by Barcode
+            // If one is found set a notifcation that this is not allowed.
+            if puzzles.contains(where: { $0.barcode.uppercased() == barcode.uppercased() }) {
+                // If a duplicate is found set an notifcation to let user know the puzzle won't be added.
+                ns.show(type: .warning, title: BZNotification.puzzleDuplicate.description, message: BZNotification.puzzleDuplicate.message)
+            } else {
+                // No duplicate found, go ahead and add the puzzle to the database; no alert needed
+                insertPuzzle()
+            }
+        }
+    }
+    
+    private func insertPuzzle() {
+        // Create a Puzzle Object with required information and insert it into the database.
+        let newPuzzle = Puzzle(
+            title: title,
+            author: author,
+            barcode: barcode,
+            pieces: pieces,
+            dateAdded: dateAdded,
+            dateStarted: dateStarted,
+            dateCompleted: dateCompleted,
+            picture: puzzlePictureData,
+            notes: notes,
+            status: status,
+            categories: categories.count < 1 ? nil : categories
+        )
+        context.insert(newPuzzle)
+        try? context.save()
+        
+        // Set a notifcation to notify user that the puzzle has been added
+        // Dismiss the screen after 3 seconds
+        ns.show(type: .success, title: BZNotification.puzzleAdded(title: title).description, message: BZNotification.puzzleAdded(title: title).message, duration: BZNotification.puzzleAdded(title: title).duration)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            dismiss()
+        }
     }
     
     // MARK: - EXTRACTED VIEWS
-    func backButton() -> some View {
+    private func backButton() -> some View {
         Button {
             dismiss()
         } label: {
@@ -111,13 +202,13 @@ struct PuzzleAddView: View {
         }
     }
     
-    func puzzleCategory(categories: [Category]) -> some View {
+    private func puzzleCategory(categories: [Category]) -> some View {
         VStack {
             Text("Categories")
                 .detailInformationHeaderViewModifier()
             HStack {
                 Button {
-                    isShowingCategoryAddUpdateView.toggle()
+                    isShowingAddNewPuzzleCategoriesView.toggle()
                 } label: {
                     Image(systemName: "plus.circle.fill")
                 }
@@ -141,7 +232,7 @@ struct PuzzleAddView: View {
         .detailInformationBlockViewModifier()
     }
     
-    func puzzleInformation() -> some View {
+    private func puzzleInformation() -> some View {
         VStack(spacing: 3) {
             Text("Information")
                 .detailInformationHeaderViewModifier()
@@ -174,7 +265,7 @@ struct PuzzleAddView: View {
         .textInputAutocapitalization(.words)
     }
     
-    func puzzleStatistics() -> some View {
+    private func puzzleStatistics() -> some View {
         VStack(spacing: 3) {
             Text("Statistics")
                 .detailInformationHeaderViewModifier()
@@ -206,7 +297,7 @@ struct PuzzleAddView: View {
         .detailInformationBlockViewModifier()
     }
     
-    func puzzleNotes() -> some View {
+    private func puzzleNotes() -> some View {
         VStack {
             Text("Notes")
                 .detailInformationHeaderViewModifier()
@@ -223,10 +314,61 @@ struct PuzzleAddView: View {
         }
         .detailInformationBlockViewModifier()
     }
+    
+    private func ImageSelector() -> some View {
+        PhotosPicker(selection: $selectedPuzzlePicture, matching: .images, photoLibrary: .shared()) {
+            Group {
+                if let puzzlePictureData,
+                   let uiImage = UIImage(data: puzzlePictureData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .containerRelativeFrame([.horizontal], { size, axis in
+                            size * 0.8
+                        })
+                } else {
+                    Image(.burma)
+                        .resizable()
+                        .scaledToFit()
+                        .containerRelativeFrame([.horizontal], { size, axis in
+                            size * 0.8
+                        })
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay {
+                            VStack {
+                                Text("Sample")
+                                    .font(.title).bold()
+                                Text("Click to Add Your Photo")
+                                    .font(.headline)
+                            }
+                            .foregroundStyle(.white)
+                            .padding()
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                }
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if puzzlePictureData != nil {
+                Button(role: .destructive) {
+                    selectedPuzzlePicture = nil
+                    puzzlePictureData = nil
+                } label: {
+                    Image(systemName: "x.circle.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(5)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .white, radius: 4, x: 0, y: 0)
+    }
 }
 
 // MARK: - PREVIEW
 #Preview {
     PuzzleAddView()
         .preferredColorScheme(.dark)
+        .environment(NotificationService())
 }

@@ -43,64 +43,64 @@ class OpenLibraryService {
     }
     
     public func fetchWork(query: String, page: Int) async throws -> OLWorksSearch {
-        guard let url = OLEndPoint.work(query: query, page: page).url else { throw BZError.invalidURL }
+        guard let url = OLEndPoint.work(query: query, page: page).url else { throw BZNotification.invalidURL }
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
-        guard let httpResponse = response as? HTTPURLResponse else { throw BZError.noNetworkAvailable }
+        guard let httpResponse = response as? HTTPURLResponse else { throw BZNotification.noNetworkAvailable }
         
         switch httpResponse.statusCode {
             case 200...299: break
-            default: throw BZError.invalidStatusCode(code: httpResponse.statusCode)
+            default: throw BZNotification.invalidStatusCode(code: httpResponse.statusCode)
         }
         
         do {
             return try decoder.decode(OLWorksSearch.self, from: data)
         } catch {
-            throw BZError.failedToDecode
+            throw BZNotification.failedToDecode
         }
     }
     
     public func fetchEdition(key: String, limit: Int, offset: Int) async throws -> [OLEditionEntry] {
-        guard let url = OLEndPoint.editionFromWork(key: key, limit: limit, offset: offset).url else { throw BZError.invalidURL }
+        guard let url = OLEndPoint.editionFromWork(key: key, limit: limit, offset: offset).url else { throw BZNotification.invalidURL }
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw BZError.noNetworkAvailable
+            throw BZNotification.noNetworkAvailable
         }
         
         switch httpResponse.statusCode {
             case 200...299: break
-            default: throw BZError.invalidStatusCode(code: httpResponse.statusCode)
+            default: throw BZNotification.invalidStatusCode(code: httpResponse.statusCode)
         }
         
         do {
             let result = try decoder.decode(OLEditionsSearch.self, from: data)
             return result.entries
         } catch {
-            throw BZError.failedToDecode
+            throw BZNotification.failedToDecode
         }
     }
     
     public func fetchAuthor<T: Decodable>(query: String) async throws -> T {
-        guard let url = OLEndPoint.authorFromAuthor(query: query).url else { throw BZError.invalidURL }
+        guard let url = OLEndPoint.authorFromAuthor(query: query).url else { throw BZNotification.invalidURL }
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw BZError.noNetworkAvailable
+            throw BZNotification.noNetworkAvailable
         }
         
         switch httpResponse.statusCode {
             case 200...299: break
-            default: throw BZError.invalidStatusCode(code: httpResponse.statusCode)
+            default: throw BZNotification.invalidStatusCode(code: httpResponse.statusCode)
         }
         
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
-            throw BZError.failedToDecode
+            throw BZNotification.failedToDecode
         }
     }
     

@@ -1,8 +1,8 @@
 //
-//  AddUpdateQuoteView.swift
-//  Bookzzle
+// Bookzzle
 //
-//  Created by Michael on 8/21/25.
+// Created by The Architect on 8/30/25
+// Copyright (c) 2025 The Architect Labs. All Rights Reserved.
 //
 
 import SwiftUI

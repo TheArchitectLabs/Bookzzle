@@ -73,7 +73,7 @@ struct BookListView: View {
         for i in indexSet {
             let book = books[i]
             context.delete(book)
-            ns.show(type: .warning, title: "Book Deleted", message: "\(book.title) has been deleted from your library", duration: 3.0)
+            ns.show(type: .warning, title: BZNotification.bookDeleted(title: book.title).description, message: BZNotification.bookDeleted(title: book.title).message)
         }
         if books.count > 1 { isExportEnabled = false }
     }

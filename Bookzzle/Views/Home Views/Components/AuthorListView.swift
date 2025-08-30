@@ -68,7 +68,7 @@ struct AuthorListView: View {
         for i in indexSet {
             let author = authors[i]
             context.delete(author)
-            ns.show(type: .warning, title: "Author Deleted", message: "\(author.authorName) has been deleted from your library", duration: 3.0)
+            ns.show(type: .warning, title: BZNotification.authorDeleted(name: author.authorName).description, message: BZNotification.authorDeleted(name: author.authorName).message)
         }
         if authors.count > 1 { isExportEnabled = false }
     }

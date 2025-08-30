@@ -22,10 +22,40 @@ enum BZNotification: LocalizedError {
     case badFileContents
     case unsupportedFileFormat
     
+    // Author Notifications
+    case authorDeleted(name: String)
+    
+    // Book Notifications
+    case bookDeleted(title: String)
+    
     // Puzzle Notifications
     case puzzleAdded(title: String)
+    case puzzleDeleted(title: String)
     case puzzleDuplicate
     case missingBarcode
+    
+    
+    // Notification Title
+    var description: String {
+        switch self {
+        case .noNetworkAvailable: "No Network Available"
+        case .invalidURL: "Invalid URL"
+        case .invalidStatusCode: "Invalid Status Code"
+        case .failedToDecode: "Failed to Decode"
+        case .invalidData: "Invalid Data"
+        case .noResults: "No Results Returned"
+        case .unknown: "Unknow Error"
+        case .badFileType: "Invalid File Type"
+        case .badFileContents: "Invalid File Contents"
+        case .unsupportedFileFormat: "Unsupported File"
+        case .authorDeleted: "Author Deleted"
+        case .bookDeleted: "Book Deleted"
+        case .puzzleAdded: "Puzzle Added"
+        case .puzzleDeleted: "Puzzle Deleted"
+        case .puzzleDuplicate: "Duplicate Puzzle"
+        case .missingBarcode: "Missing Barcode"
+        }
+    }
     
     // Notification Message
     var message: String {
@@ -50,31 +80,18 @@ enum BZNotification: LocalizedError {
             "Unable to read the file contents. Import has been stopped."
         case .unsupportedFileFormat:
             "This file is unsupported in Bookzzle."
+        case .authorDeleted(let name):
+            "\(name) has been deleted from your library"
+        case .bookDeleted(let title):
+            "\(title) has been deleted from your library"
         case .puzzleAdded(let title):
             "You have added \(title) to your library!"
+        case .puzzleDeleted(let title):
+            "\(title) has been deleted from your library"
         case .puzzleDuplicate:
             "This puzzle is already in your library."
         case .missingBarcode:
             "Puzzles require a barcode to add unless you are adding to your wishlist."
-        }
-    }
-
-    // Notification Title
-    var description: String {
-        switch self {
-        case .noNetworkAvailable: "No Network Available"
-        case .invalidURL: "Invalid URL"
-        case .invalidStatusCode: "Invalid Status Code"
-        case .failedToDecode: "Failed to Decode"
-        case .invalidData: "Invalid Data"
-        case .noResults: "No Results Returned"
-        case .unknown: "Unknow Error"
-        case .badFileType: "Invalid File Type"
-        case .badFileContents: "Invalid File Contents"
-        case .unsupportedFileFormat: "Unsupported File"
-        case .puzzleAdded: "Puzzle Added"
-        case .puzzleDuplicate: "Duplicate Puzzle"
-        case .missingBarcode: "Missing Barcode"
         }
     }
     
@@ -90,7 +107,10 @@ enum BZNotification: LocalizedError {
         case .badFileType: 3.0
         case .badFileContents: 3.0
         case .unsupportedFileFormat: 3.0
+        case .authorDeleted: 3.0
+        case .bookDeleted: 3.0
         case .puzzleAdded: 3.0
+        case .puzzleDeleted: 3.0
         case .puzzleDuplicate: 3.0
         case .missingBarcode: 3.0
         }

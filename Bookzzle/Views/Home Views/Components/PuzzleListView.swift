@@ -73,7 +73,7 @@ struct PuzzleListView: View {
         for i in indexSet {
             let puzzle = puzzles[i]
             context.delete(puzzle)
-            ns.show(type: .warning, title: "Puzzle Deleted", message: "\(puzzle.title) has been deleted from your library")
+            ns.show(type: .warning, title: BZNotification.puzzleDeleted(title: puzzle.title).description, message: BZNotification.puzzleDeleted(title: puzzle.title).message)
         }
         if puzzles.count > 1 { isExportEnabled = false }
     }

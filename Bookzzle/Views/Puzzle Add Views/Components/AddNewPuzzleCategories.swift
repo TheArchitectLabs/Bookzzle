@@ -43,16 +43,7 @@ struct AddNewPuzzleCategories: View {
                 ForEach(categories) { category in
                     categoryListRow(category: category)
                 }
-                .onDelete { indexSet in
-                    indexSet.forEach { index in
-                        if puzzleCategories.contains(categories[index]),
-                           let puzzleCategoryIndex = puzzleCategories.firstIndex(where: {$0.id == categories[index].id }) {
-                            puzzleCategories.remove(at: puzzleCategoryIndex)
-                        }
-                        context.delete(categories[index])
-                        try? context.save()
-                    }
-                }
+                .onDelete(perform: delete)
                 
                 createNewCategoryListRow()
                 
@@ -74,6 +65,17 @@ struct AddNewPuzzleCategories: View {
             } else {
                 puzzleCategories.append(category)
             }
+        }
+    }
+    
+    func delete(_ indexSet: IndexSet) {
+        indexSet.forEach { index in
+            if puzzleCategories.contains(categories[index]),
+               let puzzleCategoryIndex = puzzleCategories.firstIndex(where: {$0.id == categories[index].id }) {
+                puzzleCategories.remove(at: puzzleCategoryIndex)
+            }
+            context.delete(categories[index])
+            try? context.save()
         }
     }
     
@@ -157,6 +159,8 @@ struct AddNewPuzzleCategories: View {
             
             TextField("name", text: $name)
                 .focused($isNameFocused)
+                .textInputAutocapitalization(.words)
+                .autocorrectionDisabled()
             
             ColorPicker("Set the category color", selection: $color, supportsOpacity: false)
             

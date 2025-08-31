@@ -5,6 +5,7 @@
 // Copyright (c) 2025 The Architect Labs. All Rights Reserved.
 //
 
+import PhotosUI
 import SwiftUI
 
 struct PuzzleDetailView: View {
@@ -12,11 +13,24 @@ struct PuzzleDetailView: View {
     // MARK: - ENVIRONMENT PROPERTIES
     @Environment(\.dismiss) private var dismiss
     
+    // MARK: ENUMERATION FOR FOCUS STATE
+    enum Field: Hashable {
+        case title
+        case author
+        case barcode
+        case notes
+    }
+    
     // MARK: - BINDING PROPERTIES
     @Bindable var puzzle: Puzzle
     
     // MARK: - LOCAL STATE PROPERTIES
+    @FocusState private var focusedField: Field?
+    
+    @State private var puzzlePictureData: Data?
+    @State private var selectedPuzzlePicture: PhotosPickerItem?
     @State private var isShowingCategoryAddUpdateView: Bool = false
+    
     let numberOfPieces: [Int] = [100,300,500,1000,2000,0]
     
     // MARK: - VIEW
@@ -38,12 +52,7 @@ struct PuzzleDetailView: View {
                 }
                 
                 VStack {
-                    Image(uiImage: puzzle.uPuzzlePhoto)
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(lineWidth: 2))
-                        .frame(maxWidth: 400)
+                    ImageSelector()
                     
                     ScrollView {
                         puzzleCategory(categories: puzzle.categories ?? [])
@@ -88,6 +97,27 @@ struct PuzzleDetailView: View {
         }
         .fullScreenCover(isPresented: $isShowingCategoryAddUpdateView) {
             AddUpdateCategoryView(puzzle: puzzle)
+        }
+        .toolbar {
+            ToolbarItem(placement: .keyboard) {
+                HStack {
+                    Spacer()
+                    Button {
+                        focusedField = nil
+                    } label: {
+                        Image(systemName: "keyboard.chevron.compact.down")
+                    }
+                }
+            }
+        }
+        .task(id: selectedPuzzlePicture) {
+            if let data = try? await selectedPuzzlePicture?.loadTransferable(type: Data.self) {
+                puzzlePictureData = data
+                puzzle.picture = data
+            }
+        }
+        .onAppear {
+            puzzlePictureData = puzzle.picture
         }
     }
     
@@ -156,14 +186,17 @@ struct PuzzleDetailView: View {
                 .detailInformationHeaderViewModifier()
             LabeledContent("Title:") {
                 TextField("Title", text: $puzzle.title)
+                    .focused($focusedField, equals: .title)
                     .frame(width: 200)
             }
             LabeledContent("Author:") {
                 TextField("Author", text: $puzzle.author)
+                    .focused($focusedField, equals: .author)
                     .frame(width: 200)
             }
             LabeledContent("Barcode:") {
                 TextField("Barcode", text: $puzzle.barcode)
+                    .focused($focusedField, equals: .barcode)
                     .frame(width: 200)
             }
             LabeledContent("Pieces:") {
@@ -221,6 +254,7 @@ struct PuzzleDetailView: View {
                 .detailInformationHeaderViewModifier()
             ScrollView {
                 TextEditor(text: $puzzle.notes)
+                    .focused($focusedField, equals: .notes)
                     .frame(height: 150)
                     .frame(maxWidth: .infinity)
             }
@@ -231,6 +265,57 @@ struct PuzzleDetailView: View {
             }
         }
         .detailInformationBlockViewModifier()
+    }
+    
+    private func ImageSelector() -> some View {
+        PhotosPicker(selection: $selectedPuzzlePicture, matching: .images, photoLibrary: .shared()) {
+            Group {
+                if let puzzlePictureData,
+                   let uiImage = UIImage(data: puzzlePictureData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .containerRelativeFrame([.horizontal], { size, axis in
+                            size * 0.8
+                        })
+                } else {
+                    Image(.burma)
+                        .resizable()
+                        .scaledToFit()
+                        .containerRelativeFrame([.horizontal], { size, axis in
+                            size * 0.8
+                        })
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay {
+                            VStack {
+                                Text("Sample")
+                                    .font(.title).bold()
+                                Text("Click to Add Your Photo")
+                                    .font(.headline)
+                            }
+                            .foregroundStyle(.white)
+                            .padding()
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                }
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if puzzlePictureData != nil {
+                Button(role: .destructive) {
+                    selectedPuzzlePicture = nil
+                    puzzlePictureData = nil
+                    puzzle.picture = nil
+                } label: {
+                    Image(systemName: "x.circle.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(5)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .white, radius: 4, x: 0, y: 0)
     }
 }
 

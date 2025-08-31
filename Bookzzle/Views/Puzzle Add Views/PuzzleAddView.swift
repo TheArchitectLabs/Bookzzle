@@ -16,8 +16,19 @@ struct PuzzleAddView: View {
     @Environment(\.modelContext) private var context
     @Environment(NotificationService.self) private var ns
     
+    // MARK: ENUMERATION FOR FOCUS STATE
+    enum Field: Hashable {
+        case title
+        case author
+        case barcode
+        case notes
+    }
+    
     // MARK: - LOCAL STATE PROPERTIES
     @Query private var puzzles: [Puzzle]
+    
+    @FocusState private var focusedField: Field?
+    
     @State private var title: String = ""
     @State private var author: String = ""
     @State private var barcode: String = ""
@@ -28,11 +39,10 @@ struct PuzzleAddView: View {
     @State private var dateCompleted: Date?
     @State private var notes: String = ""
     @State private var categories: [Category] = []
-    
     @State private var puzzlePictureData: Data?
     @State private var selectedPuzzlePicture: PhotosPickerItem?
-    
     @State private var isShowingAddNewPuzzleCategoriesView: Bool = false
+    
     let numberOfPieces: [Int] = [100,300,500,1000,2000,0]
     
     // MARK: - VIEW
@@ -118,6 +128,18 @@ struct PuzzleAddView: View {
         .task(id: selectedPuzzlePicture) {
             if let data = try? await selectedPuzzlePicture?.loadTransferable(type: Data.self) {
                 puzzlePictureData = data
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .keyboard) {
+                HStack {
+                    Spacer()
+                    Button {
+                        focusedField = nil
+                    } label: {
+                        Image(systemName: "keyboard.chevron.compact.down")
+                    }
+                }
             }
         }
     }
@@ -239,14 +261,17 @@ struct PuzzleAddView: View {
             LabeledContent("Title:") {
                 TextField("Title", text: $title)
                     .frame(width: 200)
+                    .focused($focusedField, equals: .title)
             }
             LabeledContent("Author:") {
                 TextField("Author", text: $author)
                     .frame(width: 200)
+                    .focused($focusedField, equals: .author)
             }
             LabeledContent("Barcode:") {
                 TextField("Barcode", text: $barcode)
                     .frame(width: 200)
+                    .focused($focusedField, equals: .barcode)
             }
             LabeledContent("Pieces:") {
                 Picker("Pieces", selection: $pieces) {
@@ -305,6 +330,7 @@ struct PuzzleAddView: View {
                 TextEditor(text: $notes)
                     .frame(height: 150)
                     .frame(maxWidth: .infinity)
+                    .focused($focusedField, equals: .notes)
             }
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay{

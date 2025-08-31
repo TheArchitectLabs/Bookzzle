@@ -174,37 +174,14 @@ struct BookDetailView: View {
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(lineWidth: 1))
         }
     }
- 
-    func bookLanguageScroll() -> some View {
-        VStack {
-            Text("Languages")
-                .detailInformationHeaderViewModifier()
-            ScrollView(.horizontal) {
-                LazyHStack {
-                    ForEach(book.languages, id: \.self) { lang in
-                        Text(lang.capitalized)
-                            .frame(width: 35)
-                            .padding(5)
-                            .background(.blue.gradient)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-            }
-            .frame(maxHeight: 50)
-            .scrollBounceBehavior(.basedOnSize)
-            .scrollIndicators(.hidden)
-        }
-        .detailInformationBlockViewModifier()
-    }
     
     func bookLibraryInfo() -> some View {
         VStack {
             Text("Library Information")
                 .detailInformationHeaderViewModifier()
             LabeledContent("OL Key:") { Text("\(book.key)") }
-            LabeledContent("ISBN:") { Text(book.isbn)  }
-            LabeledContent("DDC:") { Text(book.ddc.first ?? "")  }
-            LabeledContent("LCCN:") { Text(book.lccn.first ?? "")  }
+            LabeledContent("ISBN-10:") { Text(book.isbn10) }
+            LabeledContent("ISBN-13:") { Text(book.isbn13) }
             LabeledContent("Pages:") { Text("\(book.numberOfPages)")  }
         }
         .detailInformationBlockViewModifier()
@@ -215,7 +192,7 @@ struct BookDetailView: View {
             Text("First Sentence")
                 .detailInformationHeaderViewModifier()
             ScrollView {
-                Text(book.firstSentence[0])
+                Text(book.firstSentence)
             }
         }
         .detailInformationBlockViewModifier()

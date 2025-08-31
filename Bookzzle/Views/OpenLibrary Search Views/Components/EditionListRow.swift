@@ -23,7 +23,8 @@ struct EditionListRow: View {
                     .fontWeight(.heavy)
                     .fontDesign(.rounded)
                 Text("Publisher: \(edition.publishers?.first ?? "Unknown")")
-                Text("ISBN: \(edition.isbn13?.first ?? "Unknown")")
+                Text("ISBN-10: \(edition.isbn10?.first ?? "Unknown")")
+                Text("ISBN-13: \(edition.isbn13?.first ?? "Unknown")")
                 Text("OL Key: \(edition.key)")
                 
             }
@@ -76,4 +77,6 @@ struct EditionListRow: View {
 #Preview {
     let edition: OLEditionEntry = OLEditionEntry.sample[0]
     EditionListRow(edition: edition)
+        .environment(NotificationService())
+        .environment(OpenLibraryService())
 }

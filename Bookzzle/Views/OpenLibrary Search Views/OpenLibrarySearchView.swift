@@ -59,12 +59,7 @@ struct OpenLibrarySearchView: View {
                     if olSearchItem == .books {
                         List {
                             ForEach(works, id: \.key) { work in
-                                if work.editionCount ?? 0 > 1 {
-                                    NavigationLink(destination: EditionView(key: work.key)) {
-                                        WorkListRow(work: work)
-                                            .padding(.bottom, 5)
-                                    }
-                                } else {
+                                NavigationLink(destination: EditionView(work: work, key: work.key)) {
                                     WorkListRow(work: work)
                                         .padding(.bottom, 5)
                                 }

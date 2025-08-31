@@ -75,4 +75,6 @@ struct AuthorListRow: View {
 #Preview {
     let author: OLAuthorDocs = OLAuthorDocs.sample[0]
     AuthorListRow(author: author)
+        .environment(NotificationService())
+        .environment(OpenLibraryService())
 }

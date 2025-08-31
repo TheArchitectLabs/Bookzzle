@@ -15,6 +15,7 @@ extension OLEditionEntry {
             title: "And Then There Were None",
             covers: [14586885],
             publishers: ["Pocket Books"],
+            isbn10: ["0123456789"],
             isbn13: ["9780671754013"]
         ),
         OLEditionEntry(
@@ -22,6 +23,7 @@ extension OLEditionEntry {
             title: "无人生还",
             covers: [14577121],
             publishers: ["Xin xing chu ban she"],
+            isbn10: ["1234567890"],
             isbn13: ["9787513322331"]
         ),
         OLEditionEntry(
@@ -29,6 +31,7 @@ extension OLEditionEntry {
             title: "Und dann gab's keines mehr",
             covers: [14573016],
             publishers: ["Atlantik"],
+            isbn10: ["23445678901"],
             isbn13: ["9783455650716"]
         ),
     ]

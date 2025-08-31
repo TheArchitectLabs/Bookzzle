@@ -23,8 +23,19 @@ struct WorkListRow: View {
                     .fontWeight(.heavy)
                     .fontDesign(.rounded)
                 Text(work.uAuthorName)
-                Text("Editions: \(work.uEditionCount)")
-                Text("First Published: \(work.uFirstPublishYear)")
+                Text(work.key)
+                Text("ISBN-10 (\(work.isbn?.count ?? 0)): \(work.isbn?.joined(separator: ", ") ?? "N/A")")
+                Text("ISBN-13:")
+                Text("First Sentence: \(work.firstSentence?.first ?? "")")
+                Text("Number of Pages: \(work.numberOfPagesMedian ?? 0)")
+                Text("First Publish Year: \(work.uFirstPublishYear)")
+                Text("-------------------------")
+                Text("CoverI: \(work.coverI ?? 0)")
+                Text("Cover Edition Key: \(work.coverEditionKey ?? "N/A")")
+                Text("-------------------------")
+                Text("Author Key (\(work.authorKey?.count ?? 0)): \(work.authorKey?.joined(separator: ", ") ?? "N/A")")
+                Text("Author Name (\(work.authorName?.count ?? 0)): \(work.authorName?.joined(separator: ", ") ?? "N/A")")
+                
             }
             .lineLimit(1)
             .font(.subheadline)
@@ -74,5 +85,8 @@ struct WorkListRow: View {
 // MARK: - PREVIEW
 #Preview {
     let work: OLWorksDocs = OLWorksDocs.sample[0]
+    
     WorkListRow(work: work)
+        .environment(NotificationService())
+        .environment(OpenLibraryService())
 }

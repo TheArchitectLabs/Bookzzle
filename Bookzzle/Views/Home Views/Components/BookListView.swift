@@ -96,15 +96,9 @@ struct BookListView: View {
                 Text(book.author?.authorName ?? "")
                     .foregroundStyle(.secondary)
                 HStack {
-                    Text("Editions: \(book.editionCount)")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .background(.blue.gradient)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(lineWidth: 2))
+                    Spacer()
                     Text("\(Status(rawValue: book.status)?.description ?? "On Shelf")")
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: 100)
                         .padding(.vertical, 5)
                         .padding(.horizontal, 10)
                         .background(Status(rawValue: book.status)?.color ?? .green)
@@ -113,6 +107,7 @@ struct BookListView: View {
                 }
             }
             .font(.subheadline)
+            .padding(.horizontal, 5)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)

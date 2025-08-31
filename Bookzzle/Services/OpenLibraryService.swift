@@ -18,7 +18,7 @@ enum OLEndPoint {
             case .work(let query, let page):
                 let baseURL = "https://openlibrary.org/search.json?"
                 let languages = "&language=eng"
-                let fields = "&fields=key,title,first_publish_year,language,first_sentence,number_of_pages_median,author_key,author_name,cover_i,cover_edition_key,ddc,isbn,lccn,edition_count,edition_key"
+                let fields = "&fields=key,title,first_publish_year,first_sentence,number_of_pages_median,author_key,author_name,cover_i,cover_edition_key,isbn"
                 return URL(string: baseURL + "\(query)" + languages + fields + "&page=\(page)")
             case .editionFromWork(let key, let limit, let offset):
                 // return URL(string: "https://openlibrary.org\(key)/editions.json?limit=\(limit)&offset=\(offset)")

@@ -22,6 +22,7 @@ struct OLEditionEntry: Codable, Identifiable {
     let title: String
     let covers: [Int]?
     let publishers: [String]?
+    let isbn10: [String]?
     let isbn13: [String]?
     
     enum CodingKeys: CodingKey {
@@ -30,24 +31,7 @@ struct OLEditionEntry: Codable, Identifiable {
         case title
         case covers
         case publishers
+        case isbn10
         case isbn13
-        
     }
-    
-    var uISBN13: String {
-        if let isbn13 = isbn13?.first {
-            return isbn13
-        } else {
-            return ""
-        }
-    }
-
-    var uCovers: Int {
-        if let covers = covers?.first {
-            return covers
-        } else {
-            return 0
-        }
-    }
-    
 }

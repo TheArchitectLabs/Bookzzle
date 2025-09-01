@@ -5,6 +5,7 @@
 // Copyright (c) 2025 The Architect Labs. All Rights Reserved.
 //
 
+import SwiftData
 import SwiftUI
 
 struct EditionView: View {
@@ -15,6 +16,8 @@ struct EditionView: View {
     @Environment(OpenLibraryService.self) private var ols
     
     // MARK: - LOCAL STATE PROPERTIES
+    @Query private var books: [Book]
+    @Query private var authors: [Author]
     @State private var entries: [OLEditionEntry] = []
     @State private var showMissingCovers: Bool = false
     
@@ -33,19 +36,23 @@ struct EditionView: View {
     @State private var coverPhoto: Data? = nil
     
     // Required to add a new author
-    @State private var authorKey: String = ""
-    @State private var authorName: String = ""
-    @State private var authorBio: String = ""
-    @State private var authorBirthDate: String = ""
-    @State private var authorDeathDate: String = ""
-    @State private var imdbID: String = ""
-    @State private var goodReadsID: String = ""
-    @State private var amazonID: String = ""
-    @State private var libraryThingID: String = ""
-    @State private var authorPhoto: Data? = nil
+    @State private var authorKey: [String] = []
+//    @State private var authorName: String = ""
+//    @State private var authorBio: String = ""
+//    @State private var authorBirthDate: String = ""
+//    @State private var authorDeathDate: String = ""
+//    @State private var imdbID: String = ""
+//    @State private var goodReadsID: String = ""
+//    @State private var amazonID: String = ""
+//    @State private var libraryThingID: String = ""
+//    @State private var authorPhoto: Data? = nil
     
     let work: OLWorksDocs
     let key: String
+    
+    var filteredEntries: [OLEditionEntry] {
+        showMissingCovers ? entries : entries.filter { $0.covers != nil }
+    }
     
     // MARK: - VIEW
     var body: some View {
@@ -77,7 +84,7 @@ struct EditionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 List {
-                    ForEach(entries) { entry in
+                    ForEach(filteredEntries) { entry in
                         EditionListRow(edition: entry)
                             .padding(.bottom, 5)
                             .onTapGesture {
@@ -91,7 +98,7 @@ struct EditionView: View {
                 .listStyle(.plain)
                 .task {
                     do {
-                        entries = try await ols.fetchEdition(key: key, limit: 25, offset: 0)
+                        entries = try await ols.fetchEdition(key: key, limit: 100, offset: 0)
                         getData()
                     } catch {
                         
@@ -106,7 +113,9 @@ struct EditionView: View {
     func getData() {
         workKey = work.key
         title = work.title
+        authorKey = work.authorKey ?? []
         
+        // TODO: What if isbn has more than 1 isbn10 or 13?
         if let isbn = work.isbn {
             isbn.forEach { isbn in
                 if isbn.count == 10 {
@@ -145,6 +154,24 @@ struct EditionView: View {
         isbn13 = entry.isbn13?.joined(separator: ", ") ?? "Unknown"
         publisher = entry.publishers?.joined(separator: ", ") ?? "Unknown"
         cover = entry.covers?.first ?? 0
+    }
+    
+    func add() {
+        
+        // Check to make sure the book doesn't already exist in the library
+        guard !books.contains(where: { book in
+            book.isbn13 == self.isbn13 ||
+            book.isbn10 == self.isbn10
+        }) else { return }
+        
+        // Check to make sure the author doesn't alresdy exist in the library
+        authorKey.forEach { key in
+            guard !authors.contains(where: { author in
+                author.authorKey == key
+            }) else { return }
+        }
+        
+        
     }
     
     // MARK: - EXTRACTED VIEWS
@@ -202,29 +229,39 @@ struct EditionView: View {
                     .font(.headline)
                     .fontWeight(.heavy)
                     .fontDesign(.rounded)
+                    .foregroundStyle(.primary)
                 Text(work.uAuthorName)
-                Text(workKey)
-                Text("ISBN-10: \(isbn10)")
-                Text("ISBN-13: \(isbn13)")
-                Text("First Sentence: \(firstSentence)")
+//                Text(workKey)
+//                Text("ISBN-10: \(isbn10)")
+                Text("ISBN: \(isbn13)")
+//                Text("First Sentence: \(firstSentence)")
                 Text("Number of Pages: \(numberOfPages)")
-                Text("First Publish Year: \(firstPublishYear)")
-                Text("Publisher: \(publisher)")
-                Text("-------------------------")
-                Text("CoverI: \(cover)")
-                Text("Cover Edition Key: \(work.coverEditionKey ?? "N/A")")
-                Text("-------------------------")
-                Text("Author Key: \(authorKey)")
-                Text("Author Name: \(authorName)")
+                Text("First Publish Year: \(String(firstPublishYear))")
+//                Text("Publisher: \(publisher)")
+//                Text("-------------------------")
+//                Text("CoverI: \(cover)")
+//                Text("Cover Edition Key: \(work.coverEditionKey ?? "N/A")")
+//                Text("-------------------------")
+//                Text("Author Key: \(authorKey)")
+//                Text("Author Name: \(authorName)")
                 
             }
             .lineLimit(1)
             .font(.subheadline)
+            .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(alignment: .bottomTrailing) {
+            Button("Add") {
+                
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(10)
+        }
+        
     }
 }
 

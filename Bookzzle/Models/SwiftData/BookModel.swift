@@ -23,7 +23,7 @@ final class Book: Codable, Transferable {
     
     var coverPhoto: Data?
     
-    var author: Author?
+    var authors: [Author] = []
     
     @Relationship(deleteRule: .cascade, inverse: \Quote.book) var quotes: [Quote] = []
     
@@ -40,7 +40,6 @@ final class Book: Codable, Transferable {
         status: Int = 2,
         coverPhoto: Data? = nil,
         quotes: [Quote] = [],
-        author: Author? = nil
     ) {
         self.key = key
         self.title = title
@@ -53,7 +52,6 @@ final class Book: Codable, Transferable {
         self.status = status
         self.coverPhoto = coverPhoto
         self.quotes = quotes
-        self.author = author
     }
     
     // MARK: - CODABLE CONFORMANCE
@@ -68,6 +66,8 @@ final class Book: Codable, Transferable {
         case publisher
         case status
         case coverPhoto
+        case quotes
+        case authors
     }
     
     required init(from decoder: Decoder) throws {
@@ -82,6 +82,8 @@ final class Book: Codable, Transferable {
         self.publisher = try container.decode(String.self, forKey: .publisher)
         self.status = try container.decode(Int.self, forKey: .status)
         self.coverPhoto = try container.decodeIfPresent(Data.self, forKey: .coverPhoto)
+        self.quotes = try container.decode([Quote].self, forKey: .quotes)
+        self.authors = try container.decode([Author].self, forKey: .authors)
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -96,6 +98,8 @@ final class Book: Codable, Transferable {
         try container.encode(publisher, forKey: .publisher)
         try container.encode(status, forKey: .status)
         try container.encodeIfPresent(coverPhoto, forKey: .coverPhoto)
+        try container.encode(quotes, forKey: .quotes)
+        try container.encode(authors, forKey: .authors)
     }
     
     // MARK: - REQUIRED FOR TRANSFERABLE CONFORMANCE

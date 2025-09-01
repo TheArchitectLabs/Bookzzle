@@ -16,7 +16,19 @@ struct BookDetailView: View {
     // MARK: - LOCAL STATE PROPERTIES
     @State private var isShowingQuoteView: Bool = false
     @State private var selectedQuote: Quote?
+    
     let book: Book
+    var authorNames: String {
+        var name = ""
+        book.authors.forEach { author in
+            if name.isEmpty {
+                name = author.authorName
+            } else {
+                name = "\n\(author.authorName)"
+            }
+        }
+        return name
+    }
     
     // MARK: - VIEW
     var body: some View {
@@ -39,22 +51,22 @@ struct BookDetailView: View {
                 
                 ScrollView {
                     VStack(spacing: 10) {
-                        HStack {
-                            bookImage()
+                        VStack {
+                            Text(authorNames)
+                                .font(.title)
+                                .fontDesign(.rounded)
+                                .fontWeight(.heavy)
+                                .multilineTextAlignment(.center)
                             
-                            VStack {
-                                Spacer()
-                                Text(book.author?.authorName ?? "Unknown")
-                                    .font(.title)
-                                    .fontDesign(.rounded)
-                                    .fontWeight(.heavy)
-                                    .multilineTextAlignment(.center)
-                                
-                                Spacer()
-                                bookVendors()
-                                Spacer()
+                            HStack {
+                                bookImage()
+                                VStack {
+                                    Spacer()
+                                    bookVendors()
+                                    Spacer()
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
                             }
-                            .frame(maxWidth: .infinity, alignment: .center)
                         }
                         .detailInformationBlockViewModifier()
                         

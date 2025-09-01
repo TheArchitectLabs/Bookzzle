@@ -23,7 +23,7 @@ final class Author: Codable, Transferable {
     
     var authorPhoto: Data?
 
-    @Relationship(deleteRule: .cascade, inverse: \Book.author) var books: [Book] = []
+    @Relationship(inverse: \Book.authors) var books: [Book] = []
     
     // MARK: - INITIALIZER
     init(

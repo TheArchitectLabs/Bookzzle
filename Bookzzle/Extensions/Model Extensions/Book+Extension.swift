@@ -32,7 +32,6 @@ extension Book {
                 status: 0,
                 coverPhoto: UIImage(named: "none")?.jpegData(compressionQuality: 1.0),
                 quotes: [],
-                author: Author.sampleAuthors[0]
             ),
             Book(
                 key: "/works/OL471576W",
@@ -44,7 +43,6 @@ extension Book {
                 status: 1,
                 coverPhoto: UIImage(named: "orient")?.jpegData(compressionQuality: 1.0),
                 quotes: [],
-                author: Author.sampleAuthors[0]
             ),
             Book(
                 key: "/works/OL472049W",
@@ -56,7 +54,6 @@ extension Book {
                 status: 2,
                 coverPhoto: UIImage(named: "sun")?.jpegData(compressionQuality: 1.0),
                 quotes: [],
-                author: Author.sampleAuthors[0]
             ),
             Book(
                 key: "/works/OL3454854W",
@@ -68,7 +65,6 @@ extension Book {
                 status: 4,
                 coverPhoto: UIImage(named: "jaws")?.jpegData(compressionQuality: 1.0),
                 quotes: [],
-                author: Author.sampleAuthors[1]
             ),
             Book(
                 key: "/works/OL3454855W",
@@ -80,7 +76,6 @@ extension Book {
                 status: 2,
                 coverPhoto: UIImage(named: "beast")?.jpegData(compressionQuality: 1.0),
                 quotes: [],
-                author: Author.sampleAuthors[1]
             )
         ]
     }

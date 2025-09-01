@@ -12,6 +12,7 @@ struct EditionView: View {
     
     // MARK: - ENVIRONMENT PROPERTIES
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
     @Environment(NotificationService.self) private var ns
     @Environment(OpenLibraryService.self) private var ols
     
@@ -157,20 +158,50 @@ struct EditionView: View {
     }
     
     func add() {
-        
         // Check to make sure the book doesn't already exist in the library
-        guard !books.contains(where: { book in
-            book.isbn13 == self.isbn13 ||
-            book.isbn10 == self.isbn10
-        }) else { return }
-        
-        // Check to make sure the author doesn't alresdy exist in the library
-        authorKey.forEach { key in
-            guard !authors.contains(where: { author in
-                author.authorKey == key
-            }) else { return }
+        guard !books.contains(where: { $0.isbn13 == self.isbn13 || $0.isbn10 == self.isbn10 }) else {
+            // Show a notification that the book already exists
+            ns.show(type: .warning, title: BZNotification.bookDuplicate.description, message: BZNotification.bookDuplicate.message)
+            return
         }
         
+        // This means the book does not exist in the library.
+        // Let's move on and add the book to our library
+        addBook()
+        
+        // Check to make sure the author doesn't alresdy exist in the library
+        // AuthorKey can contain multiple authors. We want to check each one and
+        // add the book to each author if necessary
+        authorKey.forEach { key in
+            if authors.contains(where: { $0.authorKey == key }) {
+                // This author exists. Only add the book
+                addBook()
+            } else {
+                // This author does not exist. They must be added along with the book
+                addAuthor(key: key)
+                addBook()
+            }
+        }
+    }
+    
+    func addAuthor(key: String) {
+        
+    }
+    
+    func addBook() {
+        let newBook = Book(
+            key: workKey,
+            title: title,
+            isbn10: isbn10,
+            isbn13: isbn13,
+            firstSentence: firstSentence,
+            numberOfPages: numberOfPages,
+            firstPublishYear: firstPublishYear,
+            publisher: publisher,
+            status: status,
+            coverPhoto: nil
+        )
+        context.insert(newBook)
         
     }
     

@@ -80,7 +80,19 @@ struct BookListView: View {
     
     // MARK: - EXTRACTED VIEWS
     private func bookListRowView(book: Book) -> some View {
-        HStack {
+        var authorNames: String {
+            var name = ""
+            book.authors.forEach { author in
+                if name.isEmpty {
+                    name = author.authorName
+                } else {
+                    name = "\n\(author.authorName)"
+                }
+            }
+            return name
+        }
+        
+        return HStack {
             Image(uiImage: book.uCoverPhoto)
                 .resizable()
                 .scaledToFill()
@@ -93,7 +105,7 @@ struct BookListView: View {
                 Text(book.title)
                     .foregroundStyle(.primary)
                     .font(.headline)
-                Text(book.author?.authorName ?? "")
+                Text(authorNames)
                     .foregroundStyle(.secondary)
                 HStack {
                     Spacer()

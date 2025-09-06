@@ -22,6 +22,8 @@ struct EditionView: View {
     @State private var entries: [OLEditionEntry] = []
     @State private var showMissingCovers: Bool = false
     
+    @State private var hasBookBeenAdded: Bool = false
+    
     @State private var cover: Int = 0
     
     // Required to add a new book
@@ -38,15 +40,6 @@ struct EditionView: View {
     
     // Required to add a new author
     @State private var authorKey: [String] = []
-//    @State private var authorName: String = ""
-//    @State private var authorBio: String = ""
-//    @State private var authorBirthDate: String = ""
-//    @State private var authorDeathDate: String = ""
-//    @State private var imdbID: String = ""
-//    @State private var goodReadsID: String = ""
-//    @State private var amazonID: String = ""
-//    @State private var libraryThingID: String = ""
-//    @State private var authorPhoto: Data? = nil
     
     let work: OLWorksDocs
     let key: String
@@ -106,6 +99,15 @@ struct EditionView: View {
                     }
                 }
             }
+            
+            if ns.showNotification {
+                if let notification = ns.currentNotification {
+                    VStack {
+                        Spacer()
+                        NotificationView(notification: notification)
+                    }
+                }
+            }
         }
         .navigationBarBackButtonHidden()
     }
@@ -157,7 +159,7 @@ struct EditionView: View {
         cover = entry.covers?.first ?? 0
     }
     
-    func add() {
+    func add() async {
         // Check to make sure the book doesn't already exist in the library
         guard !books.contains(where: { $0.isbn13 == self.isbn13 || $0.isbn10 == self.isbn10 }) else {
             // Show a notification that the book already exists
@@ -165,31 +167,18 @@ struct EditionView: View {
             return
         }
         
-        // This means the book does not exist in the library.
-        // Let's move on and add the book to our library
-        addBook()
-        
-        // Check to make sure the author doesn't alresdy exist in the library
-        // AuthorKey can contain multiple authors. We want to check each one and
-        // add the book to each author if necessary
-        authorKey.forEach { key in
-            if authors.contains(where: { $0.authorKey == key }) {
-                // This author exists. Only add the book
-                addBook()
-            } else {
-                // This author does not exist. They must be added along with the book
-                addAuthor(key: key)
-                addBook()
-            }
+        // The book doesn't exist so let's get the data and set it up
+        // Get the cover photo as data
+        let url = URL(string: "https://covers.openlibrary.org/b/id/\(cover).jpg")
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url!)
+            coverPhoto = data
+        } catch {
+            coverPhoto = nil
         }
-    }
-    
-    func addAuthor(key: String) {
         
-    }
-    
-    func addBook() {
-        let newBook = Book(
+        // Set up a new book
+        let newBook: Book = Book(
             key: workKey,
             title: title,
             isbn10: isbn10,
@@ -199,10 +188,96 @@ struct EditionView: View {
             firstPublishYear: firstPublishYear,
             publisher: publisher,
             status: status,
-            coverPhoto: nil
+            coverPhoto: coverPhoto
         )
-        context.insert(newBook)
         
+        // Check to make sure the author doesn't alresdy exist in the library
+        // AuthorKey can contain multiple authors. We want to check each one and
+        // add the book to each author if necessary
+        var addedToAuthor: Bool = false
+        authorKey.forEach { key in
+            let compareKey: String = "/authors/\(key)"
+            authors.forEach { author in
+                if author.authorKey == compareKey {
+                    // This author exists. Add the book to this author
+                    author.books.append(newBook)
+                    try? context.save()
+                    ns.show(type: .success, title: BZNotification.bookAdded(title: title).description, message: BZNotification.bookAdded(title: title).message)
+                    addedToAuthor = true
+                }
+            }
+        }
+        
+        // Check to make sure we didn't add the book to an author
+        guard !addedToAuthor else { return }
+        
+        // If we are here, then we need to add the author(s) and the book
+        // We already have the newBook ready. Let's create the authors...
+        // We will have to use the authorKey to retrieve the data from OpenLibrary
+        authorKey.forEach { key in
+            Task {
+                do {
+                    // Retrieve the author
+                    let result: OLAuthor = try await ols.fetchAuthor(id: key)
+                    let newAuthor: Author = Author(authorKey: result.key, authorName: result.name, authorBio: result.bio?.value ?? "", authorBirthDate: result.birthDate ?? "", authorDeathDate: result.deathDate ?? "", imdbID: result.remoteIDS?.imdb ?? "", goodReadsID: result.remoteIDS?.goodreads ?? "", amazonID: result.remoteIDS?.amazon ?? "", libraryThingID: result.remoteIDS?.librarything ?? "", authorPhoto: nil)
+                    
+                    // Retrieve the author photo
+                    let url = URL(string: "https://covers.openlibrary.org/a/olid/\(key)-L.jpg")
+                    do {
+                        let (data, _) = try await URLSession.shared.data(from: url!)
+                        coverPhoto = data
+                    } catch {
+                        coverPhoto = nil
+                    }
+                    
+                    // Assign the photo to the author
+                    newAuthor.authorPhoto = coverPhoto
+                    
+                    // Append the book to the author
+                    newAuthor.books.append(newBook)
+                    
+                    // Inseert the author
+                    context.insert(newAuthor)
+                    try? context.save()
+                    ns.show(type: .success, title: BZNotification.bookAdded(title: title).description, message: BZNotification.bookAdded(title: title).message)
+                } catch BZNotification.invalidURL {
+                    ns.show(
+                        type: .error,
+                        title: BZNotification.invalidURL.description,
+                        message: BZNotification.invalidURL.message,
+                        duration: BZNotification.invalidURL.duration
+                    )
+                } catch BZNotification.invalidStatusCode(let statusCode) {
+                    ns.show(
+                        type: .error,
+                        title: BZNotification.invalidStatusCode(code: statusCode).description,
+                        message: BZNotification.invalidStatusCode(code: statusCode).message,
+                        duration: BZNotification.invalidStatusCode(code: statusCode).duration
+                    )
+                } catch BZNotification.failedToDecode {
+                    ns.show(
+                        type: .error,
+                        title: BZNotification.failedToDecode.description,
+                        message: BZNotification.failedToDecode.message,
+                        duration: BZNotification.failedToDecode.duration
+                    )
+                } catch BZNotification.invalidData {
+                    ns.show(
+                        type: .error,
+                        title: BZNotification.invalidData.description,
+                        message: BZNotification.invalidData.message,
+                        duration: BZNotification.invalidData.duration
+                    )
+                } catch {
+                    ns.show(
+                        type: .error,
+                        title: BZNotification.unknown.description,
+                        message: BZNotification.unknown.message,
+                        duration: BZNotification.unknown.duration
+                    )
+                }
+            }
+        }
     }
     
     // MARK: - EXTRACTED VIEWS
@@ -286,11 +361,14 @@ struct EditionView: View {
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(alignment: .bottomTrailing) {
-            Button("Add") {
-                
+            Button(hasBookBeenAdded ? "Added" : "Add") {
+                Task {
+                    await add()
+                }
             }
             .buttonStyle(.borderedProminent)
             .padding(10)
+            .disabled(hasBookBeenAdded)
         }
         
     }

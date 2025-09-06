@@ -100,7 +100,7 @@ struct OpenLibrarySearchView: View {
         }
         .navigationBarBackButtonHidden()
         .onAppear {
-            olSearchItem = OLSearchItem(rawValue: currentMedium) ?? .books
+            olSearchItem = currentMedium == HomeMediumType.book.rawValue ? .books : .authors
         }
         .onChange(of: olSearchItem) { _, _ in
             clear()

@@ -28,6 +28,7 @@ enum BZNotification: LocalizedError {
     // Book Notifications
     case bookDeleted(title: String)
     case bookDuplicate
+    case bookAdded(title: String)
     
     // Puzzle Notifications
     case puzzleAdded(title: String)
@@ -54,6 +55,7 @@ enum BZNotification: LocalizedError {
                 
             case .bookDeleted: "Book Deleted"
             case .bookDuplicate: "Duplicate Book"
+            case .bookAdded: "Book Added"
                 
             case .puzzleAdded: "Puzzle Added"
             case .puzzleDeleted: "Puzzle Deleted"
@@ -93,6 +95,8 @@ enum BZNotification: LocalizedError {
                 "\(title) has been deleted from your library"
             case .bookDuplicate:
                 "This book already exists in your library."
+            case .bookAdded(let title):
+                "You have added \(title) to your library!"
                 
             case .puzzleAdded(let title):
                 "You have added \(title) to your library!"
@@ -120,6 +124,7 @@ enum BZNotification: LocalizedError {
             case .authorDeleted: 3.0
             case .bookDeleted: 3.0
             case .bookDuplicate: 3.0
+            case .bookAdded: 3.0
             case .puzzleAdded: 3.0
             case .puzzleDeleted: 3.0
             case .puzzleDuplicate: 3.0

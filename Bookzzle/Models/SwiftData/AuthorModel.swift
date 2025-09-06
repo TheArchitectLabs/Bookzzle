@@ -20,6 +20,7 @@ final class Author: Codable, Transferable {
     var goodReadsID: String
     var amazonID: String
     var libraryThingID: String
+    var wikiData: String
     
     var authorPhoto: Data?
 
@@ -36,6 +37,7 @@ final class Author: Codable, Transferable {
         goodReadsID: String = "",
         amazonID: String = "",
         libraryThingID: String = "",
+        wikiData: String = "",
         authorPhoto: Data? = nil,
         books: [Book] = []
     ) {
@@ -48,6 +50,7 @@ final class Author: Codable, Transferable {
         self.goodReadsID = goodReadsID
         self.amazonID = amazonID
         self.libraryThingID = libraryThingID
+        self.wikiData = wikiData
         self.authorPhoto = authorPhoto
         self.books = books
     }
@@ -63,6 +66,7 @@ final class Author: Codable, Transferable {
         case goodReadsID
         case amazonID
         case libraryThingID
+        case wikiData
         case authorPhoto
         case books
     }
@@ -78,6 +82,7 @@ final class Author: Codable, Transferable {
         self.goodReadsID = try container.decode(String.self, forKey: .goodReadsID)
         self.amazonID = try container.decode(String.self, forKey: .amazonID)
         self.libraryThingID = try container.decode(String.self, forKey: .libraryThingID)
+        self.wikiData = try container.decode(String.self, forKey: .wikiData)
         self.authorPhoto = try container.decodeIfPresent(Data.self, forKey: .authorPhoto)
         self.books = try container.decode([Book].self, forKey: .books)
     }
@@ -93,6 +98,7 @@ final class Author: Codable, Transferable {
         try container.encode(goodReadsID, forKey: .goodReadsID)
         try container.encode(amazonID, forKey: .amazonID)
         try container.encode(libraryThingID, forKey: .libraryThingID)
+        try container.encode(wikiData, forKey: .wikiData)
         try container.encode(authorPhoto, forKey: .authorPhoto)
         try container.encode(books, forKey: .books)
     }
